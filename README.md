@@ -32,15 +32,21 @@ ssh burst
 
 ## Installing Conda on HPC
 
-HPC documentation recommends using singularity to setup conda enviromments, however it's quite complicated and not easy for beginners. I prefer the method mentioned below, that allows us an alternative to the singularity process.
+HPC documentation recommends using singularity to setup conda enviromments, however it's quite complicated and not easy for beginners. I prefer the method mentioned below, that allows us an alternative to singularity.
+
+Frst, get a compute node on GCP Burst node. For now, don't worry about what this command does, in a later section I've explained what it does. This command will give you a shell in a compute node.
+
+```bash
+srun --account=rob_gy_6203-2022fa --cpus-per-task=8 --partition=interactive --mem=16GB --time=04:00:00 --pty /bin/bash
+```
 
 ### **Step 1:** Create directory for your conda installation
+
+We don’t want to create the environment in the home directory because of the 50GB quota limit in the `/home/<netID>/`folder.
 
 ```bash
 mkdir /scratch/<NetID>/miniconda3
 ```
-
-We don’t want to create the environment in the home directory because of the 50GB quota limit in the `/home/<netID>/`folder.
 
 ### **Step 2:** Download and install Miniconda
 
@@ -75,6 +81,48 @@ source /scratch/<NetID>/env.sh
 
 By default, new conda environment and packages will be stored in `/scratch/<NetID>/miniconda3`
 
+For ease of managing environments, initialize conda on shell start by using the following command after doing the above steps. This will allow is the activate environments using `conda activate`
+
+```bash
+conda init
+```
+
+## Example environment using Conda and PyTorch
+
+In this section, I will show an example where we install `PyTorch v1.13.0` in a conda environment. In the following section, I will show how to execute your code.
+
+SSH to greene using `ssh <netid>@greene.hpc.nyu.edu`, and then SSH to burst from greene using `ssh burst`. Then get a compute node on GCP Burst platform with a GPU using the command below.
+
+```bash
+srun --account=rob_gy_6203-2022fa --cpus-per-task=8 --partition=n1s8-v100-1 --mem=16GB --gres=gpu:v100:1 --time=04:00:00 --pty /bin/bash
+```
+
+Once you're in this node, you need to create a conda environment and install pytorch. The relevant commands are mentioned below.
+
+```bash
+conda create -n test python=3.9 -y
+conda activate test
+conda install pytorch torchvision pytorch-cuda=11.7 -c pytorch -c nvidia
+```
+
+The above steps can be seen pictorially in the images below. The pictures say the command to log into greene is `ssh greene` **BUT** that is specific to me. **You have to use the complete command `ssh <netid>@greene.hpc.nyu.edu`.**
+
+![sshgb-1](images/ssh-greene-burst-1.png)
+
+![sshgb-2](images/ssh-greene-burst-2.png)
+
+![sshgb-3](images/ssh-greene-burst-3.png)
+
+![sshgb-4](images/ssh-greene-burst-4.png)
+
+![sshgb-5](images/ssh-greene-burst-5.png)
+
+![sshgb-6](images/ssh-greene-burst-6.png)
+
+![sshgb-7](images/ssh-greene-burst-7.png)
+
+![sshgb-8](images/ssh-greene-burst-8.png)
+
 ## How to request for GPU nodes and run your code?
 
 There are 2 ways to do this, one is interactive and one is non-interactive.
@@ -82,13 +130,13 @@ There are 2 ways to do this, one is interactive and one is non-interactive.
 - **Interactive Mode:** In interactive mode, you can execute your code files just like you would on a terminal. To request for a interactive compute node, you have to use the `srun` command. To request a Tesla v100 GPU node with 2 CPUs for 4 hours, the following is the command you have to use. This will give you a terminal shell using which you can run your code just like you would on your computer.
 
 ```bash
-srun --account=rob_gy_6203-2022fa -cpus-per-task=2 --partition=n1s8-v100-1 --gres=gpu:v100:1 --time=04:00:00 --pty /bin/bash
+srun --account=rob_gy_6203-2022fa --cpus-per-task=8 --partition=n1s8-v100-1 --gres=gpu:v100:1 --time=04:00:00 --pty /bin/bash
 ```
 
 - **Non-Interactive Mode:** In Non-Interactive mode, you will submit a job which will be put in a queue. The processing of jobs in queue is automatically handled by the [SLURM workload manager](https://slurm.schedmd.com/documentation.html). This can be done using the following command.
 
 ```bash
-sbatch run-test.sbatch
+sbatch test.sbatch
 ```
 
 Contents of `test.sbatch`
