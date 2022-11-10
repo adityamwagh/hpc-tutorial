@@ -193,3 +193,7 @@ Common commands associated with non-interactive jobs
 - `scancel {StartJobId..EndJobId}` : Cancel jobs in range
 - `squeue -u $USER | awk '{print $1}' | tail -n+2 | xargs scancel` : Cancel all your jobs
 - `squeue --me --start`: See the estimated start time of your job
+
+## Miscellaneous
+
+For teams that will be using Habitat-Sim, [here](https://docs.google.com/document/d/1I5AwJrbzsCLECnSwYT0VHSozWg6iSipceLC5faqTgMg/edit?usp=sharing) is a nice tutorial by Irving Fang mentioning how to set it up on HPC. Adapt it according to the GCP Burst Platform instructions before.
